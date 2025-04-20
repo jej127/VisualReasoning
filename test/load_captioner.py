@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 image_path = '/mnt3/vcr1/vcr1images'
 data_path = '/mnt/user7/Main/visualreasoning/data/val_sample.jsonl'
-ACCESS_TOKEN='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'
+ACCESS_TOKEN=''
 login(token=ACCESS_TOKEN)
 
 def save_fig(example, image_path, idx):

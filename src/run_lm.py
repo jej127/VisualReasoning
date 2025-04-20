@@ -6,7 +6,7 @@ from tqdm import tqdm
 import numpy as np
 import random
 
-ACCESS_TOKEN='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'
+ACCESS_TOKEN=''
 model_id = "meta-llama/Meta-Llama-3-8B"
 login(token=ACCESS_TOKEN)
 

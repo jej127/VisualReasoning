@@ -8,7 +8,7 @@ import numpy as np
 import random
 import string
 
-ACCESS_TOKEN='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'
+ACCESS_TOKEN=''
 model_id = "meta-llama/Meta-Llama-3-8B"
 letters = string.ascii_lowercase
 login(token=ACCESS_TOKEN)

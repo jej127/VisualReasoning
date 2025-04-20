@@ -10,7 +10,7 @@ import json
 
 np.random.seed(123)
 
-ACCESS_TOKEN='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'
+ACCESS_TOKEN=''
 login(token=ACCESS_TOKEN)
 
 if __name__ == '__main__':
