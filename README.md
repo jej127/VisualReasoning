@@ -1,6 +1,6 @@
 # VisualReasoning
 
-This is a Pytorch implementation of BRL project: Visual Complex Reasoning.
+This is a Pytorch implementation of DILab project: Visual Complex Reasoning.
 
 ## Setup
 ```
