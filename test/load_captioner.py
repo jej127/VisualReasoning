@@ -11,8 +11,8 @@ from collections import OrderedDict
 from tqdm import tqdm
 
 image_path = '/mnt3/vcr1/vcr1images'
-data_path = '/mnt/user7/Main/visualreasoning/data/val_sample.jsonl'
-ACCESS_TOKEN=''
+data_path = '/mnt/user7/Main/VisualReasoning/data/val_sample.jsonl'
+ACCESS_TOKEN='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'
 login(token=ACCESS_TOKEN)
 
 def save_fig(example, image_path, idx):
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     processor = Blip2Processor.from_pretrained(model_id)
     model = Blip2ForConditionalGeneration.from_pretrained(model_id, device_map="auto")
 
-    query = 'Please describe the image content in details.'
+    query = 'Please describe the image content in details?'
 
     data = []
     with jsonlines.open(data_path) as f:
@@ -47,8 +47,8 @@ if __name__ == '__main__':
             data.append(d)
 
     model_id_ = model_id.split('/')[-1]
-    output_path = f'/mnt/user7/Main/visualreasoning/results/captions/captions_{model_id_}_vcr.jsonl'
-    if os.path.exists(output_path): os.remove(output_path)
+    output_path = f'/mnt/user7/Main/VisualReasoning/results/captions/captions_{model_id_}_vcr_fin.jsonl'
+    #if os.path.exists(output_path): os.remove(output_path)
 
     for idx in tqdm(range(len(data)), desc='Captioning..'):
         example = data[idx]
@@ -76,6 +76,6 @@ if __name__ == '__main__':
         my_data = {"question": question, 
                    "answer_choices": answer_choices, "rationale_choices": rationale_choices,
                     "generated_c": generated_caption, "image_num":example["img_id"]}
-        with open(output_path, "a") as f:
-            json.dump(my_data, f)
-            f.write("\n")
+        # with open(output_path, "a") as f:
+        #     json.dump(my_data, f)
+        #     f.write("\n")
