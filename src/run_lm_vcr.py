@@ -10,7 +10,7 @@ import string
 import os
 import json
 
-ACCESS_TOKEN='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'
+ACCESS_TOKEN=''
 model_id = "meta-llama/Meta-Llama-3-8B"
 letters = string.ascii_lowercase
 login(token=ACCESS_TOKEN)
