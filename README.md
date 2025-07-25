@@ -39,5 +39,5 @@ CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr_caid2.py
 
 ## CaID: Evaluating on VCR using refined description
 ```
-CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr_inst_caid.py.py
+CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr_caid_fin.py
 ```
