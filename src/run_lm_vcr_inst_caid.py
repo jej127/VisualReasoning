@@ -9,7 +9,7 @@ import random
 import string
 import os
 
-ACCESS_TOKEN=''
+ACCESS_TOKEN='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'
 model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
 letters = string.ascii_uppercase
 login(token=ACCESS_TOKEN)

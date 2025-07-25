@@ -8,10 +8,15 @@ import os
 import numpy as np
 import json
 
-np.random.seed(123)
-
-ACCESS_TOKEN=''
-login(token=ACCESS_TOKEN)
+#123
+#42
+#12
+#111
+#222
+#333
+#444
+seed=444
+np.random.seed(seed)
 
 if __name__ == '__main__':
     image_path = '/mnt3/vcr1/vcr1images'
@@ -28,7 +33,7 @@ if __name__ == '__main__':
     #     print()
 
     idxs = np.random.choice(len(data), 2653, replace=False)
-    output_path = '/mnt/user7/Main/visualreasoning/data/val_sample.jsonl'
+    output_path = f'/mnt/user7/Main/VisualReasoning/data/val_sample_{seed}.jsonl'
     if os.path.exists(output_path): os.remove(output_path)
     for idx in idxs:
         with open(output_path, "a") as f:

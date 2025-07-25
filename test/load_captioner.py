@@ -9,10 +9,15 @@ import json
 import jsonlines
 from collections import OrderedDict
 from tqdm import tqdm
+os.environ["CUDA_VISIBLE_DEVICES"] = "1,2"
 
+UserEvaluatePrompt = \
+"""Describe the image content in details. Describe all that is in the image."""
+
+seed = 123
 image_path = '/mnt3/vcr1/vcr1images'
-data_path = '/mnt/user7/Main/VisualReasoning/data/val_sample.jsonl'
-ACCESS_TOKEN='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'
+data_path = f'/mnt/user7/Main/VisualReasoning/data/val_sample_{seed}.jsonl'
+ACCESS_TOKEN='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'
 login(token=ACCESS_TOKEN)
 
 def save_fig(example, image_path, idx):
@@ -35,9 +40,9 @@ def list2sentence(w_list, objects):
 
 if __name__ == '__main__':
     model_id = "Salesforce/blip2-flan-t5-xxl"
+    
     processor = Blip2Processor.from_pretrained(model_id)
-    model = Blip2ForConditionalGeneration.from_pretrained(model_id, device_map="auto")
-
+    model = Blip2ForConditionalGeneration.from_pretrained(model_id, device_map="auto", cache_dir='/mnt3/visual_data')
     query = 'Please describe the image content in details?'
 
     data = []
@@ -47,8 +52,8 @@ if __name__ == '__main__':
             data.append(d)
 
     model_id_ = model_id.split('/')[-1]
-    output_path = f'/mnt/user7/Main/VisualReasoning/results/captions/captions_{model_id_}_vcr_fin.jsonl'
-    #if os.path.exists(output_path): os.remove(output_path)
+    output_path = f'/mnt/user7/Main/VisualReasoning/results/captions/captions_{model_id_}_vcr_fin_{seed}_.jsonl'
+    if os.path.exists(output_path): os.remove(output_path)
 
     for idx in tqdm(range(len(data)), desc='Captioning..'):
         example = data[idx]
@@ -67,15 +72,21 @@ if __name__ == '__main__':
 
         #save_fig(example,'/mnt/user7/Main/visualreasoning/test/images_vcr', idx)
 
+        query = UserEvaluatePrompt.format(question=question, 
+                                            choice_a=answer_choices[0],
+                                            choice_b=answer_choices[1],
+                                            choice_c=answer_choices[2],
+                                            choice_d=answer_choices[3],)
+
         inputs = processor(raw_image, query, return_tensors="pt").to("cuda")
         out = model.generate(**inputs, max_new_tokens=64)
         generated_caption = processor.decode(out[0], skip_special_tokens=True)
 
-        print(generated_caption)
+        #print(generated_caption)
 
         my_data = {"question": question, 
                    "answer_choices": answer_choices, "rationale_choices": rationale_choices,
                     "generated_c": generated_caption, "image_num":example["img_id"]}
-        # with open(output_path, "a") as f:
-        #     json.dump(my_data, f)
-        #     f.write("\n")
+        with open(output_path, "a") as f:
+            json.dump(my_data, f)
+            f.write("\n")
