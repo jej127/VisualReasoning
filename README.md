@@ -46,3 +46,8 @@ CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr_caid_fin.py
 ```
 CUDA_VISIBLE_DEVICES=1 python ./test/similarity2.py
 ```
+
+## CVR-ICL: Evaluating on VCR using In-context examples
+```
+CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr_cvrllm_v.py
+```
