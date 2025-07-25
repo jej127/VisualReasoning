@@ -7,21 +7,72 @@ from tqdm import tqdm
 import numpy as np
 import random
 import string
+import os
+import json
 
-ACCESS_TOKEN=''
+ACCESS_TOKEN='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'
 model_id = "meta-llama/Meta-Llama-3-8B"
 letters = string.ascii_lowercase
 login(token=ACCESS_TOKEN)
+seed=123
+
+# SystemEvaluatePrompt = \
+# """Below is a multiple-choice question with a story and several answer options. Based on the content of the story and the given question, please infer the most likely answer and output the answer index.
+# Note:
+# (1) Please only output the most likely answer index based on the given information, and do not output any other content."""
+
+# SystemEvaluatePrompt_rat = \
+# """Below is a multiple-choice question with a story, an answer for the question, and several rationale options. Based on the content of the story and the given question and the answer, please infer the most likely rationale that supports the answer and output the rationale index.
+# Note:
+# (1) Please only output the most likely rationale index based on the given information, and do not output any other content."""
 
 SystemEvaluatePrompt = \
-"""Below is a multiple-choice question with a story and several answer options. Based on the content of the story and the given question, please infer the most likely answer and output the answer index.
-Note:
-(1) Please only output the most likely answer index based on the given information, and do not output any other content."""
+"""Below is a multiple-choice question with a story and several answer options. Based on the content of the story and the given question, please infer the most likely answer.
+"""
 
 SystemEvaluatePrompt_rat = \
-"""Below is a multiple-choice question with a story, an answer for the question, and several rationale options. Based on the content of the story and the given question and the answer, please infer the most likely rationale that supports the answer and output the rationale index.
-Note:
-(1) Please only output the most likely rationale index based on the given information, and do not output any other content."""
+"""Below is a multiple-choice question with a story, an answer for the question, and several rationale options. Based on the content of the story and the given question and the answer, please infer the most likely rationale that supports the answer.
+"""
+
+SystemEvaluatePrompt = \
+""""""
+
+SystemEvaluatePrompt_rat = \
+""""""
+
+
+# UserEvaluatePrompt4Choices = \
+# """Context:
+# {story}
+
+# Question:
+# {question}
+
+# Candidate Answers:
+# A. {choice_a}
+# B. {choice_b}
+# C. {choice_c}
+# D. {choice_d}
+
+# Answer (Only reply with "[[A]]", "[[B]]", "[[C]]", or "[[D]]"):"""
+
+# UserEvaluatePrompt4Choices_rat = \
+# """Context:
+# {story}
+
+# Question:
+# {question}
+
+# Answer:
+# {answer}
+
+# Candidate Rationales:
+# A. {choice_a}
+# B. {choice_b}
+# C. {choice_c}
+# D. {choice_d}
+
+# Rationale (Only reply with "[[A]]", "[[B]]", "[[C]]", or "[[D]]"):"""
 
 UserEvaluatePrompt4Choices = \
 """Context:
@@ -30,7 +81,7 @@ UserEvaluatePrompt4Choices = \
 Question:
 {question}
 
-Candidate Answers:
+Choices:
 A. {choice_a}
 B. {choice_b}
 C. {choice_c}
@@ -43,18 +94,15 @@ UserEvaluatePrompt4Choices_rat = \
 {story}
 
 Question:
-{question}
+Why is the statement "{answer}" the answer to the question "{question}"
 
-Answer:
-{answer}
-
-Candidate Rationales:
+Choices:
 A. {choice_a}
 B. {choice_b}
 C. {choice_c}
 D. {choice_d}
 
-Rationale:"""
+# Answer:"""
 
 def process_output(pred, choices):
     try:
@@ -135,14 +183,15 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     model = AutoModelForCausalLM.from_pretrained(model_id).to(device)
 
-    data_path = '/mnt/user7/Main/visualreasoning/results/captions/captions_blip2-flan-t5-xxl_vcr_fin.jsonl'
+    data_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_blip2-flan-t5-xxl_vcr_fin_123.jsonl'
+    #data_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_Molmo-7B-D-0924_vcr_123.jsonl'
     data = []
     with jsonlines.open(data_path) as f:
         for line in f.iter():
             d = {k:v for k,v in line.items()}
             data.append(d)
 
-    answer_path = '/mnt/user7/Main/visualreasoning/data/val_sample.jsonl'
+    answer_path = f'/mnt/user7/Main/VisualReasoning/data/val_sample_{seed}.jsonl'
     gt_ans,gt_rat = [],[]
     with jsonlines.open(answer_path) as f:
         for line in f.iter():
@@ -151,6 +200,14 @@ if __name__ == '__main__':
             gt_rat.append(d["rationale_label"])
 
     gt_ans, gt_rat = np.array(gt_ans), np.array(gt_rat)
+
+    reasoning_path = '/mnt/user7/Main/VisualReasoning/results/reasoning'
+    model_id_ = model_id.split('/')[-1]
+    reasoning_output_path = os.path.join(reasoning_path, f'{model_id_}_reasoning_vanilla_{seed}.txt')
+    if os.path.exists(reasoning_output_path): os.remove(reasoning_output_path)
+
+    output_path = os.path.join(reasoning_path, f'{model_id_}_reasoning_vanilla_{seed}.jsonl')
+    if os.path.exists(output_path): os.remove(output_path)
 
     pred_ans, pred_rat = [], []
     m = 10000
@@ -161,7 +218,9 @@ if __name__ == '__main__':
         answer_choices = d["answer_choices"]
         rationale_choices = d["rationale_choices"]
         question = d["question"]
+        img_id = d['image_num']
         ans_idx = gt_ans[j]
+        rat_idx = gt_rat[j]
         answer = answer_choices[ans_idx]
 
         input_q2a = UserEvaluatePrompt4Choices.format(story=story, 
@@ -178,8 +237,8 @@ if __name__ == '__main__':
                                                            choice_c=rationale_choices[2],
                                                            choice_d=rationale_choices[3])
         
-        input_ids_q2a = tokenizer(SystemEvaluatePrompt+'\n\n'+input_q2a, return_tensors="pt").to(device)
-        input_ids_qa2r = tokenizer(SystemEvaluatePrompt_rat+'\n\n'+input_qa2r, return_tensors="pt").to(device)
+        input_ids_q2a = tokenizer(input_q2a, return_tensors="pt").to(device)
+        input_ids_qa2r = tokenizer(input_qa2r, return_tensors="pt").to(device)
 
         prompt_length_q2a = input_ids_q2a['input_ids'].shape[1]
         prompt_length_qa2r = input_ids_qa2r['input_ids'].shape[1]
@@ -195,8 +254,35 @@ if __name__ == '__main__':
         r_q2a = process_output(response_q2a, answer_choices)
         r_qa2r = process_output(response_qa2r, rationale_choices)
 
+        if r_q2a not in [0,1,2,3]:
+            r_q2a = random.randrange(4)
+        if r_qa2r not in [0,1,2,3]:
+            r_qa2r = random.randrange(4)
+
+        final_a, final_r = ['\n[[A]]','\n[[B]]','\n[[C]]','\n[[D]]'][r_q2a], ['\n[[A]]','\n[[B]]','\n[[C]]','\n[[D]]'][r_qa2r]
+
         pred_ans.append(r_q2a)
         pred_rat.append(r_qa2r)
+
+        qa_t, qar_t = str(r_q2a==gt_ans[j]), str(r_qa2r==gt_rat[j])
+        a,r = ['A','B','C','D'][ans_idx], ['A','B','C','D'][rat_idx]
+        with open(reasoning_output_path, "a") as f:
+            f.write("#"*20 + "\n")
+            f.write(img_id + "\n")
+            f.write("#"*10 + 'Q2A' + "\n")
+            f.write("<Prompt>\n")
+            f.write(SystemEvaluatePrompt+'\n\n'+input_q2a+"\n\n")
+            f.write("<Output>\n")
+            f.write(final_a + "\n\n")
+            f.write(f"GT: {a}\n")
+            f.write(f"Result: {qa_t}\n\n")
+            f.write("#"*10 + 'QA2R' + "\n")
+            f.write("<Prompt>\n")
+            f.write(SystemEvaluatePrompt_rat+'\n\n'+input_qa2r+"\n\n")
+            f.write("<Output>\n")
+            f.write(final_r + "\n\n")
+            f.write(f"GT: {r}\n")
+            f.write(f"Result: {qar_t}\n\n")
 
         # print('#'*10)
         # print(input_q2a)
@@ -207,6 +293,13 @@ if __name__ == '__main__':
         # print(response_qa2r)
         # print(r_qa2r)
         # print()
+
+        my_data = {"story": story, "question": question, 
+                   "answer_choices": answer_choices, "rationale_choices": rationale_choices, "answer": answer,
+                    "a": final_a, "r": final_r, "image_num":img_id}
+        with open(output_path, "a") as f:
+            json.dump(my_data, f)
+            f.write("\n")
 
     pred_ans, pred_rat = np.array(pred_ans), np.array(pred_rat)
 
