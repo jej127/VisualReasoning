@@ -20,9 +20,6 @@ CUDA_VISIBLE_DEVICES=1 python ./test/load_captioner.py
 ```
 # Evaluating Llama3-8B on VCR
 CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr.py
-
-# Evaluating Llama3-8B-Instruct on VCR
-CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr_inst.py
 ```
 
 ## CaID: Generating follow-up question using LLM
