@@ -41,3 +41,8 @@ CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr_caid2.py
 ```
 CUDA_VISIBLE_DEVICES=1 python ./src/run_lm_vcr_caid_fin.py
 ```
+
+## CVR-ICL: Generate similarity score data
+```
+CUDA_VISIBLE_DEVICES=1 python ./test/similarity2.py
+```
