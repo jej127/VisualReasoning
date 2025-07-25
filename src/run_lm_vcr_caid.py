@@ -10,7 +10,7 @@ import string
 import json
 import os
 
-ACCESS_TOKEN='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'
+ACCESS_TOKEN=''
 model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
 #model_id = "meta-llama/Llama-3.1-8B-Instruct"
 letters = string.ascii_uppercase
@@ -27,16 +27,17 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     model = AutoModelForCausalLM.from_pretrained(model_id).to(device)
 
-    #data_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_blip2-flan-t5-xxl_vcr_fin.jsonl'
-    data_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_Molmo-7B-D-0924_vcr_123.jsonl'
+    data_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_blip2-flan-t5-xxl_vcr_fin_123.jsonl'
+    #data_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_Molmo-7B-D-0924_vcr_123.jsonl'
+    
     data = []
     with jsonlines.open(data_path) as f:
         for line in f.iter():
             d = {k:v for k,v in line.items()}
             data.append(d)
 
-    # output_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_blip2-flan-t5-xxl_vcr_caid.jsonl'
-    output_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_Molmo-7B-D-0924_vcr_123_caid.jsonl'
+    output_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_blip2-flan-t5-xxl_vcr_caid.jsonl'
+    #output_path = '/mnt/user7/Main/VisualReasoning/results/captions/captions_Molmo-7B-D-0924_vcr_123_caid.jsonl'
     if os.path.exists(output_path): os.remove(output_path)
 
     m = 10000

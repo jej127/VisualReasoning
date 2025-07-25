@@ -18,7 +18,7 @@ seed=123
 image_path = '/mnt3/vcr1/vcr1images'
 data_path = f'/mnt/user7/Main/VisualReasoning/data/val_sample_{seed}.jsonl'
 data_path2 = '/mnt/user7/Main/VisualReasoning/results/captions/captions_blip2-flan-t5-xxl_vcr_caid.jsonl'
-ACCESS_TOKEN='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'
+ACCESS_TOKEN=''
 
 login(token=ACCESS_TOKEN)
 
@@ -45,8 +45,8 @@ if __name__ == '__main__':
     processor = Blip2Processor.from_pretrained(model_id)
     model = Blip2ForConditionalGeneration.from_pretrained(model_id, device_map="auto", cache_dir='/mnt3/visual_data')
 
-    query_old = 'Please describe the image content in details.'
-    query = """Please answer the question in a complete sentence, not in words. Do not omit any key information. If the answer is either 'yes' or 'no', add the supporting sentence."""
+    # query_old = 'Please describe the image content in details.'
+    # query = """Please answer the question in a complete sentence, not in words. Do not omit any key information. If the answer is either 'yes' or 'no', add the supporting sentence."""
 
     data = []
     with jsonlines.open(data_path) as f:
